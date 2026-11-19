@@ -83,7 +83,7 @@ O script valida todas as equações energéticas, o dimensionamento fotovoltaico
 
 ### 2. Abrir o módulo SERS do Neighborhood Action Dashboard
 
-Basta abrir `dashboard/index.html` diretamente no navegador (sem dependências externas) ou servir localmente:
+O painel está publicado em https://thallesp.github.io/gs-2026-2-sers/dashboard/ e também roda local: basta abrir `dashboard/index.html` diretamente no navegador (sem dependências externas) ou servir localmente:
 
 ```bash
 python3 -m http.server 8000

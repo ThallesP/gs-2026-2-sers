@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neighborhood Action Dashboard — Módulo SERS | CitizenTech 2026.2</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #111a2e;
+      --panel-alt: #16223b;
+      --border: #253554;
+      --text: #e6edf7;
+      --muted: #93a4c3;
+      --green: #22c55e;
+      --green-soft: rgba(34, 197, 94, 0.14);
+      --amber: #f59e0b;
+      --amber-soft: rgba(245, 158, 11, 0.14);
+      --blue: #38bdf8;
+      --blue-soft: rgba(56, 189, 248, 0.14);
+      --red: #f87171;
+      --red-soft: rgba(248, 113, 113, 0.14);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .container { max-width: 1240px; margin: 0 auto; padding: 24px 20px 56px; }
+    header {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start;
+      gap: 16px; border-bottom: 1px solid var(--border); padding-bottom: 18px; margin-bottom: 22px;
+    }
+    .badge {
+      display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px;
+      font-weight: 600; background: var(--green-soft); color: var(--green); border: 1px solid rgba(34,197,94,0.35);
+      margin-bottom: 8px;
+    }
+    h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.02em; }
+    .subtitle { margin: 0; color: var(--muted); font-size: 14px; }
+    .meta-box {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 16px; font-size: 13px; color: var(--muted);
+    }
+    .meta-box strong { color: var(--text); }
+    .controls {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px; background: var(--panel); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px; margin-bottom: 22px;
+    }
+    .control-group label {
+      display: block; font-size: 12px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;
+    }
+    .control-group select, .control-group input[type="number"], .control-group input[type="range"] {
+      width: 100%; background: var(--panel-alt); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 14px;
+    }
+    .range-val { font-size: 12px; color: var(--blue); font-weight: 600; margin-top: 4px; display: block; }
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 14px; margin-bottom: 24px;
+    }
+    .kpi {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px;
+    }
+    .kpi-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+    .kpi-value { font-size: 26px; font-weight: 700; margin: 6px 0 4px; color: var(--green); }
+    .kpi.blue .kpi-value { color: var(--blue); }
+    .kpi.amber .kpi-value { color: var(--amber); }
+    .kpi-sub { font-size: 12px; color: var(--muted); }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 18px; margin-bottom: 24px; }
+    .card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px;
+      margin-bottom: 22px;
+    }
+    .grid-2 .card { margin-bottom: 0; }
+    .card h2 { margin: 0 0 4px; font-size: 18px; }
+    .card .desc { margin: 0 0 14px; font-size: 13px; color: var(--muted); }
+    svg { width: 100%; height: auto; display: block; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px 10px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; background: rgba(255,255,255,0.02); }
+    tr:last-child td { border-bottom: none; }
+    .pill {
+      display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600;
+    }
+    .pill-ok { background: var(--green-soft); color: var(--green); }
+    .pill-warn { background: var(--amber-soft); color: var(--amber); }
+    .pill-info { background: var(--blue-soft); color: var(--blue); }
+    .arch-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 12px; margin-top: 12px;
+    }
+    .arch-node {
+      background: var(--panel-alt); border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+    }
+    .arch-node .step { font-size: 11px; color: var(--blue); font-weight: 700; text-transform: uppercase; }
+    .arch-node h3 { margin: 4px 0 6px; font-size: 14px; }
+    .arch-node p { margin: 0; font-size: 12px; color: var(--muted); }
+    .notice {
+      background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 10px; padding: 14px 16px; font-size: 13px; color: #cbd5e1;
+    }
+    .benefits-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 10px;
+    }
+    .benefit {
+      background: var(--panel-alt); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+    }
+    .benefit h3 { margin: 0 0 6px; font-size: 14px; color: var(--green); }
+    .benefit p { margin: 0; font-size: 12.5px; color: var(--muted); }
+    footer {
+      margin-top: 26px; padding-top: 16px; border-top: 1px solid var(--border);
+      font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    @media (max-width: 560px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <span class="badge">Global Solution 2026.2 · CitizenTech · SERS</span>
+        <h1>Neighborhood Action Dashboard — Praça Comunitária Sustentável</h1>
+        <p class="subtitle">
+          Módulo de monitoramento energético, comparação de alternativas e sustentabilidade urbana (iluminação pública fotovoltaica off-grid + dimerização PIR).
+        </p>
+      </div>
+      <div class="meta-box">
+        <div><strong>Turma:</strong> 1CCPA — Ciência da Computação (FIAP)</div>
+        <div><strong>Integrantes:</strong> Thalles Passos da Cunha (RM 574879) · Waldir Arthur Holanda de Sousa (RM 576869)</div>
+        <div><strong>Modelo de dados:</strong> <code>src/calculos_sers.py</code> → <code>data/sers_dados_simulados.json</code></div>
+      </div>
+    </header>
+
+    <!-- Controles interativos de premissas -->
+    <section class="controls" aria-label="Premissas do simulador energético">
+      <div class="control-group">
+        <label for="fatorSin">Fator de Emissão SIN (MCTI/SIRENE)</label>
+        <select id="fatorSin">
+          <option value="0.0461" selected>MCTI 2025 oficial (0,0461 tCO₂/MWh)</option>
+          <option value="0.0545">MCTI 2024 oficial (0,0545 tCO₂/MWh)</option>
+          <option value="0.0850">Cenário seco / vídeo (0,0850 tCO₂/MWh)</option>
+          <option value="0.0385">MCTI 2023 mínimo recente (0,0385 tCO₂/MWh)</option>
+          <option value="0.1263">MCTI 2021 estresse hídrico (0,1263 tCO₂/MWh)</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="baseAnual">Base Anual de Referência</label>
+        <select id="baseAnual">
+          <option value="360" selected>360 dias (12 meses × 30 dias — base comercial)</option>
+          <option value="365">365 dias (ano calendário — sensibilidade)</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="qtdPostes">Postes na Praça</label>
+        <input id="qtdPostes" type="range" min="4" max="30" step="1" value="10" />
+        <span class="range-val" id="qtdPostesVal">10 postes</span>
+      </div>
+      <div class="control-group">
+        <label for="tarifa">Tarifa de Energia (R$/kWh)</label>
+        <input id="tarifa" type="number" min="0.40" max="1.60" step="0.05" value="0.85" />
+      </div>
+      <div class="control-group">
+        <label for="pirNoite">Acionamentos PIR / poste / madrugada</label>
+        <input id="pirNoite" type="range" min="0" max="40" step="1" value="15" />
+        <span class="range-val" id="pirNoiteVal">15 acionamentos (30 min a 100%)</span>
+      </div>
+    </section>
+
+    <!-- KPIs principais (Brief 4.5) -->
+    <section class="kpi-grid" aria-label="Indicadores de Eficiência e Sustentabilidade">
+      <div class="kpi">
+        <div class="kpi-label">Economia da Rede (Alt B)</div>
+        <div class="kpi-value" id="kpiEconKwh">900 kWh/mês</div>
+        <div class="kpi-sub" id="kpiEconSub">100% do consumo convencional eliminado (10.800 kWh/ano)</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Redução na Fatura Elétrica</div>
+        <div class="kpi-value" id="kpiEconBrl">R$ 765,00/mês</div>
+        <div class="kpi-sub" id="kpiEconBrlSub">R$ 9.180,00/ano · Payback fatura ~26,1 meses (kit R$ 20k)</div>
+      </div>
+      <div class="kpi blue">
+        <div class="kpi-label">Emissões de CO₂ Evitadas</div>
+        <div class="kpi-value" id="kpiCo2">497,9 kg/ano</div>
+        <div class="kpi-sub" id="kpiCo2Sub">Fator selecionado: 0,0461 tCO₂/MWh (MCTI 2025)</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Participação Renovável</div>
+        <div class="kpi-value">100%</div>
+        <div class="kpi-sub">Geração solar fotovoltaica local + banco LiFePO₄</div>
+      </div>
+      <div class="kpi amber">
+        <div class="kpi-label">Carga Local Solar (Alt B)</div>
+        <div class="kpi-value" id="kpiCargaLocal">178,8 kWh/mês</div>
+        <div class="kpi-sub" id="kpiCargaLocalSub">80% menos energia bruta que o vapor de sódio (596 Wh/poste/noite)</div>
+      </div>
+      <div class="kpi blue">
+        <div class="kpi-label">Operação Eficiente (Dimer.)</div>
+        <div class="kpi-value">7 h/dia</div>
+        <div class="kpi-sub">23h00–06h00 em 30% (24 W) + boost 100% (2 min via PIR)</div>
+      </div>
+    </section>
+
+    <!-- Gráficos comparativos e simulação 72h -->
+    <div class="grid-2">
+      <section class="card">
+        <h2>Comparação Energética Mensal (30 dias)</h2>
+        <p class="desc">Consumo elétrico da rede (kWh/mês) versus carga própria gerada localmente por fonte solar fotovoltaica.</p>
+        <div id="chartComparacao"></div>
+      </section>
+
+      <section class="card">
+        <h2>Simulação de Autonomia — 72h (1 Dia Sol + 2 Dias Nublados)</h2>
+        <p class="desc">Estado de carga (SoC %) da bateria LiFePO₄ (25,6 V / 100 Ah = 2,56 kWh) por poste com painel de 330 Wp e dimerização PIR. Limite mínimo de segurança: 20% (DoD 80%).</p>
+        <div id="chartAutonomia"></div>
+      </section>
+    </div>
+
+    <!-- Tabela comparativa completa (Brief 4.3) -->
+    <section class="card">
+      <h2>Quadro Comparativo das Alternativas Energéticas</h2>
+      <p class="desc">Avaliação para a mesma necessidade de iluminação pública da praça (12 h/noite, 30 dias/mês) nos 5 critérios exigidos.</p>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Critério</th>
+              <th>Cenário Atual (Vapor de Sódio 250 W)</th>
+              <th>Alternativa A (LED 100 W na Rede)</th>
+              <th>Alternativa B — Escolhida (Solar 80 W + LiFePO₄ + PIR)</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaComparativa"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Arquitetura conceitual (Brief 4.4) -->
+    <section class="card">
+      <h2>Diagrama Conceitual de Funcionamento e Telemetria</h2>
+      <p class="desc">Fluxo de ponta a ponta integrando geração fotovoltaica, sensores ambientais e elétricos, controle embarcado e indicadores do dashboard.</p>
+      <div class="arch-grid">
+        <div class="arch-node">
+          <div class="step">1. Fonte de Energia</div>
+          <h3>Módulo FV 330 Wp + MPPT + LiFePO₄ 2,56 kWh</h3>
+          <p>Captação solar diurna (~4,5 HSP médios) e armazenamento com autonomia projetada de 3,09 dias (DoD 80%).</p>
+        </div>
+        <div class="arch-node">
+          <div class="step">2. Equipamento Consumidor</div>
+          <h3>Luminária LED 80 W + Driver PWM</h3>
+          <p>Alta eficiência luminosa (~155 lm/W, óptica assimétrica) com controle eletrônico de potência entre 24 W (30%) e 80 W (100%).</p>
+        </div>
+        <div class="arch-node">
+          <div class="step">3. Sensores e Dados</div>
+          <h3>PIR + Telemetria Elétrica (V, I, SoC, PWM)</h3>
+          <p>Sensor infravermelho de presença aliado a medições de tensão/corrente FV, estado de carga da bateria e energia entregue ao LED.</p>
+        </div>
+        <div class="arch-node">
+          <div class="step">4. Lógica de Automação</div>
+          <h3>Microcontrolador Embarcado</h3>
+          <p>18h–23h em 100%; 23h–06h em 30% com boost de 2 min ao detectar pedestres; proteção contra descarga profunda (&lt;20% SoC).</p>
+        </div>
+        <div class="arch-node">
+          <div class="step">5. Processamento</div>
+          <h3>Gateway LoRaWAN / API SERS</h3>
+          <p>Consolida pacotes dos 10 postes, calcula kWh evitados, economia financeira, CO₂ evitado (MCTI) e alertas de sombreamento/manutenção.</p>
+        </div>
+        <div class="arch-node">
+          <div class="step">6. Visualização</div>
+          <h3>Neighborhood Action Dashboard</h3>
+          <p>Exibe KPIs mensuráveis para moradores e gestores públicos, comparando alternativas e monitorando a saúde de cada poste.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Telemetria simulada dos 10 postes -->
+    <section class="card">
+      <h2>Telemetria Simulada dos Postes da Praça (Última Noite)</h2>
+      <p class="desc">Visão operacional integrada ao painel comunitário — detecta anomalias como sombreamento arbóreo antes de falhas de iluminação.</p>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Poste</th>
+              <th>Setor da Praça</th>
+              <th>SoC Bateria (06h)</th>
+              <th>Acionamentos PIR</th>
+              <th>Carga Local (Wh/noite)</th>
+              <th>Consumo Rede</th>
+              <th>Status Operacional</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaPostes"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Benefícios comunitários + Limitações (Brief 4.1 e 7) -->
+    <section class="card">
+      <h2>Benefícios Comunitários Esperados e Limitações Técnicas</h2>
+      <div class="benefits-grid">
+        <div class="benefit">
+          <h3>Segurança e Conforto Visual</h3>
+          <p>LEDs com IRC &gt; 70 substituem a luz amarelada de vapor de sódio (IRC ~25), melhorando o reconhecimento facial e de obstáculos; a resposta PIR em 100% acompanha pedestres na madrugada.</p>
+        </div>
+        <div class="benefit">
+          <h3>Resiliência Energética</h3>
+          <p>Por operar fora da rede (off-grid), a praça permanece iluminada mesmo durante quedas de energia no bairro, reduzindo áreas escuras vulneráveis.</p>
+        </div>
+        <div class="benefit">
+          <h3>Eficiência Fiscal Municipal</h3>
+          <p>A economia de R$ 9.180/ano na fatura elétrica de uma única praça pode ser realocada em manutenção urbana e replicada em escala municipal.</p>
+        </div>
+        <div class="benefit">
+          <h3>Menor Poluição Luminosa</h3>
+          <p>A dimerização para 30% entre 23h e 06h na ausência de transeuntes reduz o ofuscamento em residências vizinhas e o impacto sobre a fauna noturna urbana.</p>
+        </div>
+      </div>
+      <div class="notice" style="margin-top:16px;">
+        <strong>Aviso Metodológico e Limitações (Diretriz de SERS):</strong> Os números exibidos são <strong>projeções condicionadas às premissas adotadas</strong> (tarifa média, irradiação solar do Sudeste, perdas de sistema de 25% e fatores oficiais do MCTI/SIRENE), gerados a partir de simulação em software sem protótipo físico em campo. A operação off-grid não possui custo operacional nulo no ciclo de vida: requer limpeza semestral dos painéis, poda preventiva contra sombreamento (ilustrada no alerta do poste P-08) e substituição planejada das baterias LiFePO₄ após 6 a 8 anos, com descarte via logística reversa.
+      </div>
+    </section>
+
+    <footer>
+      <span>CitizenTech · Global Solution 2026.2 · FIAP — Soluções em Energias Renováveis e Sustentáveis (SERS)</span>
+      <span>Fontes: ANEEL · EPE (BEN) · MCTI/SIRENE (SIN 2021, 2023, 2024 e 2025) · CRESESB/INPE · ABNT NBR 5101</span>
+    </footer>
+  </div>
+
+  <script>
+    const POSTES_BASE = [
+      { id: "P-01", loc: "Entrada Principal Norte", soc: 88, pir: 18, status: "Normal" },
+      { id: "P-02", loc: "Pista de Caminhada Leste", soc: 85, pir: 22, status: "Normal" },
+      { id: "P-03", loc: "Playground Infantil", soc: 91, pir: 12, status: "Normal" },
+      { id: "P-04", loc: "Quadra Poliesportiva", soc: 84, pir: 24, status: "Normal" },
+      { id: "P-05", loc: "Ponto de Ônibus Adjacente", soc: 82, pir: 26, status: "Normal" },
+      { id: "P-06", loc: "Área de Convivência Central", soc: 89, pir: 16, status: "Normal" },
+      { id: "P-07", loc: "Academia ao Ar Livre", soc: 87, pir: 14, status: "Normal" },
+      { id: "P-08", loc: "Passarela Sul", soc: 76, pir: 11, status: "Atenção (Sombra parcial)" },
+      { id: "P-09", loc: "Ciclovia Lateral Oeste", soc: 86, pir: 19, status: "Normal" },
+      { id: "P-10", loc: "Entrada Secundária Sul", soc: 90, pir: 13, status: "Normal" }
+    ];
+
+    const fmtNum = (n, d = 1) => n.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
+    const fmtBRL = (n) => "R$ " + n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function simular72h(pirNoite) {
+      const batMax = 2560; // 25.6V x 100Ah LiFePO4
+      const dodMin = batMax * 0.20;
+      const eff = 0.90;
+      const geracaoDiaPleno = 330 * 4.5 * 0.75; // 1113.75 Wh
+      const perfil = { 6:0.05, 7:0.20, 8:0.45, 9:0.70, 10:0.90, 11:1.0, 12:1.0, 13:0.92, 14:0.75, 15:0.50, 16:0.25, 17:0.08 };
+      const somaPerfil = Object.values(perfil).reduce((a, b) => a + b, 0);
+      const clima = [1.0, 0.25, 0.20];
+      const pirDist = [0.26, 0.20, 0.14, 0.07, 0.07, 0.13, 0.13]; // 23h..05h
+      let soc = batMax * 0.90;
+      const pts = [];
+      for (let d = 0; d < 3; d++) {
+        for (let off = 0; off < 24; off++) {
+          const h = (6 + off) % 24;
+          const gen = ((perfil[h] || 0) / somaPerfil) * geracaoDiaPleno * clima[d];
+          let cons = 0;
+          if (h >= 18 && h <= 22) {
+            cons = 80;
+          } else if (h === 23 || h <= 5) {
+            const idx = h === 23 ? 0 : h + 1;
+            const ev = pirNoite * pirDist[idx];
+            cons = 24 + 56 * ((ev * 2) / 60);
+          }
+          soc = Math.max(dodMin, Math.min(batMax, soc + gen - cons / eff));
+          pts.push({ x: d * 24 + off, socPct: (soc / batMax) * 100, gen, cons, dia: d + 1 });
+        }
+      }
+      return pts;
+    }
+
+    function renderBarChart(atualKwh, altAKwh, altBLocalKwh) {
+      const maxVal = Math.max(atualKwh, 100) * 1.15;
+      const w = 520, h = 230, padL = 54, padB = 46, padT = 20, padR = 20;
+      const cw = w - padL - padR, ch = h - padT - padB;
+      const bars = [
+        { label: "Atual (Sódio 250W)", rede: atualKwh, solar: 0, color: "#f87171" },
+        { label: "Alt A (LED 100W Rede)", rede: altAKwh, solar: 0, color: "#f59e0b" },
+        { label: "Alt B (Solar 80W + PIR)", rede: 0, solar: altBLocalKwh, color: "#22c55e" }
+      ];
+      const bw = 96;
+      const gap = (cw - bars.length * bw) / (bars.length + 1);
+
+      let svg = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Gráfico comparativo de consumo mensal">`;
+      for (let i = 0; i <= 4; i++) {
+        const y = padT + ch - (ch * i) / 4;
+        const val = (maxVal * i) / 4;
+        svg += `<line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="#253554" stroke-dasharray="3 3" />`;
+        svg += `<text x="${padL - 8}" y="${y + 4}" fill="#93a4c3" font-size="11" text-anchor="end">${Math.round(val)}</text>`;
+      }
+      bars.forEach((b, i) => {
+        const x = padL + gap + i * (bw + gap);
+        const val = b.rede > 0 ? b.rede : b.solar;
+        const bh = (val / maxVal) * ch;
+        const y = padT + ch - bh;
+        const tag = b.rede > 0 ? `${fmtNum(b.rede, 0)} kWh (rede)` : `0 rede · ${fmtNum(b.solar, 1)} solar`;
+        svg += `<rect x="${x}" y="${y}" width="${bw}" height="${bh}" rx="6" fill="${b.color}" fill-opacity="0.85" />`;
+        svg += `<text x="${x + bw / 2}" y="${y - 6}" fill="#e6edf7" font-size="11" font-weight="600" text-anchor="middle">${tag}</text>`;
+        svg += `<text x="${x + bw / 2}" y="${h - 22}" fill="#cbd5e1" font-size="11.5" text-anchor="middle">${b.label}</text>`;
+      });
+      svg += `<text x="${padL}" y="${h - 4}" fill="#93a4c3" font-size="10.5">kWh/mês (30 dias) · Barra verde = carga LED local com geração solar (rede = 0 kWh)</text>`;
+      svg += `</svg>`;
+      document.getElementById("chartComparacao").innerHTML = svg;
+    }
+
+    function renderAutonomiaChart(pts) {
+      const w = 520, h = 230, padL = 44, padB = 38, padT = 18, padR = 16;
+      const cw = w - padL - padR, ch = h - padT - padB;
+      const sx = (i) => padL + (i / 71) * cw;
+      const sy = (pct) => padT + ch - (pct / 100) * ch;
+      const path = pts.map((p, i) => `${i === 0 ? "M" : "L"}${sx(i).toFixed(1)},${sy(p.socPct).toFixed(1)}`).join(" ");
+      const minSoc = Math.min(...pts.map(p => p.socPct));
+
+      let svg = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Curva de autonomia da bateria em 72 horas">`;
+      // Fundo para dias nublados (horas 24..71)
+      svg += `<rect x="${sx(24)}" y="${padT}" width="${sx(71) - sx(24)}" height="${ch}" fill="rgba(148,163,184,0.08)" />`;
+      svg += `<text x="${sx(12)}" y="${padT + 12}" fill="#f59e0b" font-size="10.5" text-anchor="middle">Dia 1: Sol pleno</text>`;
+      svg += `<text x="${sx(48)}" y="${padT + 12}" fill="#93a4c3" font-size="10.5" text-anchor="middle">Dias 2 e 3: Nublado / Chuvoso (20–25% sol)</text>`;
+
+      [0, 20, 40, 60, 80, 100].forEach(pct => {
+        const y = sy(pct);
+        const isLim = pct === 20;
+        svg += `<line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="${isLim ? "#f87171" : "#253554"}" stroke-dasharray="${isLim ? "5 3" : "2 3"}" />`;
+        svg += `<text x="${padL - 6}" y="${y + 4}" fill="${isLim ? "#f87171" : "#93a4c3"}" font-size="10.5" text-anchor="end">${pct}%</text>`;
+      });
+      svg += `<path d="${path}" fill="none" stroke="#38bdf8" stroke-width="2.6" />`;
+      [0, 12, 24, 36, 48, 60, 71].forEach(hIdx => {
+        svg += `<text x="${sx(hIdx)}" y="${h - 18}" fill="#93a4c3" font-size="10.5" text-anchor="middle">${hIdx}h</text>`;
+      });
+      svg += `<text x="${padL}" y="${h - 3}" fill="#22c55e" font-size="10.5" font-weight="600">SoC mínimo atingido: ${fmtNum(minSoc, 1)}% (acima do limite seguro de 20% para DoD 80%)</text>`;
+      svg += `</svg>`;
+      document.getElementById("chartAutonomia").innerHTML = svg;
+    }
+
+    function atualizar() {
+      const fator = parseFloat(document.getElementById("fatorSin").value);
+      const fatorLabel = document.getElementById("fatorSin").selectedOptions[0].text;
+      const diasAno = parseInt(document.getElementById("baseAnual").value, 10);
+      const qtd = parseInt(document.getElementById("qtdPostes").value, 10);
+      const tarifa = Math.max(0.1, parseFloat(document.getElementById("tarifa").value) || 0.85);
+      const pir = parseInt(document.getElementById("pirNoite").value, 10);
+
+      document.getElementById("qtdPostesVal").textContent = `${qtd} postes`;
+      document.getElementById("pirNoiteVal").textContent = `${pir} acionamentos (${pir * 2} min a 100%)`;
+
+      // Cálculos E = (P * t) / 1000
+      const atualDia = (250 * 12 / 1000) * qtd;
+      const atualMes = atualDia * 30;
+      const atualAno = atualDia * diasAno;
+      const atualCustoMes = atualMes * tarifa;
+      const atualCustoAno = atualAno * tarifa;
+
+      const altADia = (100 * 12 / 1000) * qtd;
+      const altAMes = altADia * 30;
+      const altAAno = altADia * diasAno;
+      const altACustoMes = altAMes * tarifa;
+      const altAEconMesBrl = atualCustoMes - altACustoMes;
+      const capexA = 600 * qtd;
+      const paybackA = capexA / altAEconMesBrl;
+
+      const boostH = (pir * 2) / 60;
+      const whPosteAltB = 80 * 5 + 24 * 7 + (80 - 24) * boostH;
+      const altBLocalMes = (whPosteAltB / 1000) * qtd * 30;
+      const capexBCompacto = 2000 * qtd;
+      const capexBEstendido = 3200 * qtd;
+      const opexManutB = 5 * qtd;
+      const paybackBCompacto = capexBCompacto / atualCustoMes;
+      const paybackBEstendido = capexBEstendido / atualCustoMes;
+
+      const co2AltB = atualAno * fator; // kg CO2/ano
+      const co2AltA = (atualAno - altAAno) * fator;
+
+      document.getElementById("kpiEconKwh").textContent = `${fmtNum(atualMes, 0)} kWh/mês`;
+      document.getElementById("kpiEconSub").textContent = `100% da rede eliminado (${fmtNum(atualAno, 0)} kWh/${diasAno}d)`;
+      document.getElementById("kpiEconBrl").textContent = `${fmtBRL(atualCustoMes)}/mês`;
+      document.getElementById("kpiEconBrlSub").textContent = `${fmtBRL(atualCustoAno)}/ano · Payback fatura ~${fmtNum(paybackBEstendido, 1)} meses`;
+      document.getElementById("kpiCo2").textContent = `${fmtNum(co2AltB, 1)} kg/ano`;
+      document.getElementById("kpiCo2Sub").textContent = `Fator: ${fatorLabel}`;
+      document.getElementById("kpiCargaLocal").textContent = `${fmtNum(altBLocalMes, 1)} kWh/mês`;
+      const reducaoBruta = (1 - altBLocalMes / atualMes) * 100;
+      document.getElementById("kpiCargaLocalSub").textContent = `${fmtNum(reducaoBruta, 1)}% menos energia bruta (${fmtNum(whPosteAltB, 0)} Wh/poste/noite)`;
+
+      renderBarChart(atualMes, altAMes, altBLocalMes);
+      renderAutonomiaChart(simular72h(pir));
+
+      document.getElementById("tabelaComparativa").innerHTML = `
+        <tr>
+          <td><strong>Fonte de Energia</strong></td>
+          <td>Rede elétrica convencional (SIN)</td>
+          <td>Rede elétrica convencional (SIN)</td>
+          <td><strong>100% Solar Fotovoltaica Off-Grid + LiFePO₄</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Consumo da Rede (30 dias)</strong></td>
+          <td>${fmtNum(atualMes, 0)} kWh/mês</td>
+          <td>${fmtNum(altAMes, 0)} kWh/mês (-60%)</td>
+          <td><strong>0 kWh/mês (-100% da rede)</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Carga Local Suprida (30 dias)</strong></td>
+          <td>— (100% da rede)</td>
+          <td>— (100% da rede)</td>
+          <td><strong>${fmtNum(altBLocalMes, 1)} kWh/mês</strong> (geração solar própria; ${fmtNum(whPosteAltB, 0)} Wh/poste/noite)</td>
+        </tr>
+        <tr>
+          <td><strong>Fatura Mensal de Energia</strong></td>
+          <td>${fmtBRL(atualCustoMes)}/mês</td>
+          <td>${fmtBRL(altACustoMes)}/mês</td>
+          <td><strong>R$ 0,00/mês</strong> (+ ~${fmtBRL(opexManutB)}/mês reserva de manutenção preventiva)</td>
+        </tr>
+        <tr>
+          <td><strong>CAPEX Estimado & Payback</strong></td>
+          <td>R$ 0,00 (infraestrutura existente)</td>
+          <td>~${fmtBRL(capexA)} · Payback simples ~${fmtNum(paybackA, 1)} meses</td>
+          <td>~${fmtBRL(capexBEstendido)} (sistema especificado; payback ~${fmtNum(paybackBEstendido, 1)} m). Kit compacto: ~${fmtBRL(capexBCompacto)} (~${fmtNum(paybackBCompacto, 1)} m)</td>
+        </tr>
+        <tr>
+          <td><strong>Emissões Evitadas (${diasAno}d)</strong></td>
+          <td>0 kg CO₂/ano (linha de base)</td>
+          <td>${fmtNum(co2AltA, 1)} kg CO₂/ano</td>
+          <td><strong>${fmtNum(co2AltB, 1)} kg CO₂/ano</strong> (${fatorLabel.split("(")[0].trim()})</td>
+        </tr>
+        <tr>
+          <td><strong>Viabilidade & Manutenção</strong></td>
+          <td>Lâmpadas de menor vida útil e alto gasto contínuo</td>
+          <td>Implantação rápida; mantém dependência da rede e desperdício na madrugada</td>
+          <td>Dispensa valas/cabeamento; requer insolação livre de sombras, limpeza semestral e troca de baterias em 6–8 anos</td>
+        </tr>
+      `;
+
+      document.getElementById("tabelaPostes").innerHTML = POSTES_BASE.map(p => {
+        const wh = 80 * 5 + 24 * 7 + 56 * ((p.pir * 2) / 60);
+        const badge = p.status === "Normal"
+          ? `<span class="pill pill-ok">Normal</span>`
+          : `<span class="pill pill-warn">${p.status}</span>`;
+        return `
+          <tr>
+            <td><strong>${p.id}</strong></td>
+            <td>${p.loc}</td>
+            <td>${p.soc}%</td>
+            <td>${p.pir} eventos</td>
+            <td>${fmtNum(wh, 1)} Wh</td>
+            <td><span class="pill pill-info">0,0 kWh</span></td>
+            <td>${badge}</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    ["fatorSin", "baseAnual", "qtdPostes", "tarifa", "pirNoite"].forEach(id => {
+      document.getElementById(id).addEventListener("input", atualizar);
+      document.getElementById(id).addEventListener("change", atualizar);
+    });
+    atualizar();
+  </script>
+</body>
+</html>
